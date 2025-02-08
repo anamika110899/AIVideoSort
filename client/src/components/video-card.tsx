@@ -25,12 +25,16 @@ export default function VideoCard({ video }: VideoCardProps) {
               Processing...
             </div>
           )}
-          <Badge 
-            className="absolute top-2 right-2"
-            variant={video.status === "completed" ? "default" : "secondary"}
-          >
-            {video.status}
-          </Badge>
+          <div className="absolute top-2 right-2 flex gap-2">
+            <Badge variant="secondary" className="capitalize">
+              {video.category}
+            </Badge>
+            <Badge 
+              variant={video.status === "completed" ? "default" : "secondary"}
+            >
+              {video.status}
+            </Badge>
+          </div>
         </div>
       </CardContent>
       <CardFooter className="flex flex-col items-start gap-4 p-4">

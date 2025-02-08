@@ -6,6 +6,7 @@ export const videos = pgTable("videos", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull(),
   prompt: text("prompt").notNull(),
+  category: text("category").notNull().default("general"),
   status: text("status").notNull().default("pending"),
   url: text("url"),
   thumbnail: text("thumbnail"),
@@ -15,7 +16,8 @@ export const videos = pgTable("videos", {
 export const insertVideoSchema = createInsertSchema(videos)
   .omit({ id: true, url: true, thumbnail: true, createdAt: true })
   .extend({
-    prompt: z.string().min(10).max(1000)
+    prompt: z.string().min(10).max(1000),
+    category: z.enum(["news", "technology", "business", "sports", "entertainment", "general"])
   });
 
 export type InsertVideo = z.infer<typeof insertVideoSchema>;
