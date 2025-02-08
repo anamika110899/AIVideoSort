@@ -6,9 +6,8 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import Generate from "@/pages/generate";
-import "./lib/clerk";
 
-function Router() {
+const Router = () => {
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -17,15 +16,15 @@ function Router() {
       <Route component={NotFound} />
     </Switch>
   );
-}
+};
 
-function App() {
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <Router />
       <Toaster />
     </QueryClientProvider>
   );
-}
+};
 
 export default App;
