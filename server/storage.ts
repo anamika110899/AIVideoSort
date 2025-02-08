@@ -1,4 +1,6 @@
 import { videos, type Video, type InsertVideo } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getVideos(userId: string): Promise<Video[]>;
@@ -7,47 +9,33 @@ export interface IStorage {
   updateVideo(id: number, update: Partial<Video>): Promise<Video>;
 }
 
-export class MemStorage implements IStorage {
-  private videos: Map<number, Video>;
-  private currentId: number;
-
-  constructor() {
-    this.videos = new Map();
-    this.currentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getVideos(userId: string): Promise<Video[]> {
-    return Array.from(this.videos.values()).filter(
-      (video) => video.userId === userId
-    );
+    return await db.select().from(videos).where(eq(videos.userId, userId));
   }
 
   async getVideo(id: number): Promise<Video | undefined> {
-    return this.videos.get(id);
+    const [video] = await db.select().from(videos).where(eq(videos.id, id));
+    return video;
   }
 
   async createVideo(insertVideo: InsertVideo): Promise<Video> {
-    const id = this.currentId++;
-    const video: Video = {
-      ...insertVideo,
-      id,
-      status: "pending",
-      url: null,
-      thumbnail: null,
-      createdAt: new Date()
-    };
-    this.videos.set(id, video);
+    const [video] = await db
+      .insert(videos)
+      .values(insertVideo)
+      .returning();
     return video;
   }
 
   async updateVideo(id: number, update: Partial<Video>): Promise<Video> {
-    const video = await this.getVideo(id);
+    const [video] = await db
+      .update(videos)
+      .set(update)
+      .where(eq(videos.id, id))
+      .returning();
     if (!video) throw new Error("Video not found");
-    
-    const updatedVideo = { ...video, ...update };
-    this.videos.set(id, updatedVideo);
-    return updatedVideo;
+    return video;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
