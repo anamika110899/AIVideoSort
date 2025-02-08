@@ -9,7 +9,7 @@ export default function Home() {
         <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
           AI-Powered Video Generation
         </h1>
-        
+
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-12">
           Create stunning videos with the power of artificial intelligence. Just describe what you want to see, and let our AI do the magic.
         </p>
