@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertVideoSchema } from "@shared/schema";
+import { insertVideoSchema, insertNewsSchema } from "@shared/schema";
 import { generateVideo } from "./ai";
 
 export function registerRoutes(app: Express): Server {
@@ -71,6 +71,18 @@ export function registerRoutes(app: Express): Server {
       res.json(video);
     } catch (error) {
       console.error("Error creating video:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Get news articles with optional category filter
+  app.get("/api/news", async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const articles = await storage.getNews(category);
+      res.json(articles);
+    } catch (error) {
+      console.error("Error fetching news:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });

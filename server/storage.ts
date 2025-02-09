@@ -1,12 +1,16 @@
-import { videos, type Video, type InsertVideo } from "@shared/schema";
+import { videos, news, type Video, type InsertVideo, type News, type InsertNews } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   getVideos(userId: string): Promise<Video[]>;
   getVideo(id: number): Promise<Video | undefined>;
   createVideo(video: InsertVideo): Promise<Video>;
   updateVideo(id: number, update: Partial<Video>): Promise<Video>;
+
+  // News methods
+  getNews(category?: string): Promise<News[]>;
+  createNews(news: InsertNews): Promise<News>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -35,6 +39,22 @@ export class DatabaseStorage implements IStorage {
       .returning();
     if (!video) throw new Error("Video not found");
     return video;
+  }
+
+  async getNews(category?: string): Promise<News[]> {
+    let query = db.select().from(news).orderBy(desc(news.publishedAt));
+    if (category && category !== "all") {
+      query = query.where(eq(news.category, category));
+    }
+    return await query;
+  }
+
+  async createNews(insertNews: InsertNews): Promise<News> {
+    const [article] = await db
+      .insert(news)
+      .values(insertNews)
+      .returning();
+    return article;
   }
 }
 
