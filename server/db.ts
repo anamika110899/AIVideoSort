@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
 
+
 // Only use WebSocket for production (Replit) environment
 if (process.env.NODE_ENV === 'production') {
   neonConfig.webSocketConstructor = ws;

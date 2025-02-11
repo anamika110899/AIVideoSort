@@ -1,6 +1,10 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express, { Request, Response, NextFunction } from "express";
+import dotenv from "dotenv";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
 app.use(express.json());
@@ -37,6 +41,11 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  if (!process.env.OPENAI_API_KEY) {
+    console.error("❌ Missing OPENAI_API_KEY in environment variables");
+    process.exit(1);
+  }
+
   const server = registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -44,22 +53,19 @@ app.use((req, res, next) => {
     const message = err.message || "Internal Server Error";
 
     res.status(status).json({ message });
-    throw err;
+    console.error("❌ Error:", err);
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
+  // Setup Vite in development mode
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client
-  const PORT = 5000;
-  server.listen(PORT, "0.0.0.0", () => {
-    log(`serving on port ${PORT}`);
+  // Always serve the app on port 5000
+  const PORT = process.env.PORT || 5000;
+  server.listen(PORT, () => {
+    log(`🚀 Server running on port ${PORT}`);
   });
 })();
